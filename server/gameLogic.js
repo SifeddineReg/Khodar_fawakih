@@ -26,7 +26,7 @@ class GameManager {
         settings: {
           roundTime: 60,
           totalRounds: 5,
-          categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون']
+          categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون', 'اسم ولد', 'اسم بنت', 'مدينة']
         },
         currentRound: 0,
         timeLeft: 60,

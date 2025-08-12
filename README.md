@@ -23,6 +23,9 @@ A multiplayer Arabic word game similar to Scattergories, built with React, Node.
 - بلد (Countries)
 - جماد (Objects)
 - لون (Colors)
+- اسم ولد (Boy Name)
+- اسم بنت (Girl Name)
+- مدينة (City)
 
 ## 🚀 Quick Start
 

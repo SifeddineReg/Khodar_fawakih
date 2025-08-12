@@ -51,7 +51,7 @@ const AnswerForm = ({ categories, currentLetter, onSubmit, timeLeft }) => {
         <div className="text-3xl font-bold text-accent-500">{currentLetter}</div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category, index) => (
           <motion.div
             key={category}

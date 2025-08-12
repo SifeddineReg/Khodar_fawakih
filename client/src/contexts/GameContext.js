@@ -10,7 +10,7 @@ const initialState = {
   totalRounds: 5,
   timeLeft: 60,
   currentLetter: '',
-  categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون'],
+          categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون', 'اسم ولد', 'اسم بنت', 'مدينة'],
   answers: {},
   players: [],
   scores: {},
