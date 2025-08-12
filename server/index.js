@@ -86,15 +86,30 @@ io.on('connection', (socket) => {
 
   // Join lobby
   socket.on('joinLobby', (data) => {
-    const { roomId } = data;
+    const { roomId, playerName } = data;
     const room = gameManager.getRoom(roomId);
     
-    if (room) {
-      const lobbyData = gameManager.getLobbyData(roomId);
-      socket.emit('lobbyUpdate', lobbyData);
-    } else {
+    if (!room) {
       socket.emit('error', { message: 'الغرفة غير موجودة', code: 'ROOM_NOT_FOUND' });
+      return;
     }
+
+    socket.join(roomId);
+    
+    // Try to reconnect if player name is provided
+    if (playerName) {
+      const reconnectResult = gameManager.reconnectPlayer(roomId, socket.id, playerName);
+      if (reconnectResult.success) {
+        console.log(`Player ${playerName} reconnected to room ${roomId}`);
+      }
+    }
+    
+    // Send lobby data
+    const lobbyData = gameManager.getLobbyData(roomId);
+    socket.emit('lobbyUpdate', lobbyData);
+    
+    // Notify other players
+    socket.to(roomId).emit('playerJoined', { id: socket.id, name: 'Player' });
   });
 
   // Start game

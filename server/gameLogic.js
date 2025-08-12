@@ -4,6 +4,7 @@ class GameManager {
   constructor() {
     this.rooms = new Map();
     this.playerRooms = new Map(); // socketId -> roomId
+    this.roomTimeouts = new Map(); // roomId -> timeout
   }
 
   // Room Management
@@ -26,7 +27,7 @@ class GameManager {
         settings: {
           roundTime: 60,
           totalRounds: 5,
-          categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون', 'اسم ولد', 'اسم بنت', 'مدينة']
+          categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون']
         },
         currentRound: 0,
         timeLeft: 60,
@@ -263,14 +264,62 @@ class GameManager {
       room.players[0].isHost = true;
     }
 
-    // If no players left, delete room
+    // If no players left, schedule room deletion (30 minutes timeout)
     if (room.players.length === 0) {
-      this.rooms.delete(roomId);
+      this.scheduleRoomDeletion(roomId);
+    } else {
+      // Clear any existing timeout since players are back
+      this.clearRoomTimeout(roomId);
     }
 
     this.playerRooms.delete(socketId);
 
     return { success: true, player, room: room.players.length > 0 ? room : null };
+  }
+
+  scheduleRoomDeletion(roomId) {
+    // Clear existing timeout if any
+    this.clearRoomTimeout(roomId);
+    
+    // Schedule room deletion after 30 minutes
+    const timeout = setTimeout(() => {
+      this.rooms.delete(roomId);
+      this.roomTimeouts.delete(roomId);
+      console.log(`Room ${roomId} deleted due to inactivity`);
+    }, 30 * 60 * 1000); // 30 minutes
+    
+    this.roomTimeouts.set(roomId, timeout);
+  }
+
+  clearRoomTimeout(roomId) {
+    const timeout = this.roomTimeouts.get(roomId);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.roomTimeouts.delete(roomId);
+    }
+  }
+
+  // Handle player reconnection
+  reconnectPlayer(roomId, socketId, playerName) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return { success: false, error: 'الغرفة غير موجودة' };
+    }
+
+    // Check if player exists in room
+    const existingPlayer = room.players.find(p => p.name === playerName);
+    if (!existingPlayer) {
+      return { success: false, error: 'اللاعب غير موجود في الغرفة' };
+    }
+
+    // Update player's socket ID
+    existingPlayer.id = socketId;
+    this.playerRooms.set(socketId, roomId);
+
+    // Clear room timeout since player is back
+    this.clearRoomTimeout(roomId);
+
+    return { success: true, room, player: existingPlayer };
   }
 
   kickPlayer(roomId, playerId) {
@@ -363,10 +412,35 @@ class GameManager {
   }
 
   generateArabicLetter() {
-    const arabicLetters = [
-      'أ', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي'
+    // More common Arabic letters with weighted distribution
+    const commonLetters = [
+      'أ', 'أ', 'أ', // أ is very common
+      'ب', 'ب', 'ب', 'ب', // ب is very common
+      'ت', 'ت', 'ت', // ت is very common
+      'ج', 'ج', 'ج', // ج is very common
+      'ح', 'ح', // ح is common
+      'خ', 'خ', // خ is common
+      'د', 'د', 'د', // د is very common
+      'ر', 'ر', 'ر', // ر is very common
+      'س', 'س', 'س', 'س', // س is very common
+      'ش', 'ش', 'ش', // ش is very common
+      'ص', 'ص', // ص is common
+      'ض', // ض is less common
+      'ط', 'ط', // ط is common
+      'ظ', // ظ is less common
+      'ع', 'ع', 'ع', // ع is very common
+      'غ', 'غ', // غ is common
+      'ف', 'ف', 'ف', // ف is very common
+      'ق', 'ق', 'ق', // ق is very common
+      'ك', 'ك', 'ك', // ك is very common
+      'ل', 'ل', 'ل', 'ل', // ل is very common
+      'م', 'م', 'م', 'م', // م is very common
+      'ن', 'ن', 'ن', // ن is very common
+      'ه', 'ه', 'ه', // ه is very common
+      'و', 'و', 'و', // و is very common
+      'ي', 'ي', 'ي', 'ي' // ي is very common
     ];
-    return arabicLetters[Math.floor(Math.random() * arabicLetters.length)];
+    return commonLetters[Math.floor(Math.random() * commonLetters.length)];
   }
 }
 

@@ -21,6 +21,10 @@ export const SocketProvider = ({ children }) => {
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: false,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
     });
 
     newSocket.on('connect', () => {
@@ -39,9 +43,24 @@ export const SocketProvider = ({ children }) => {
       toast.error('خطأ في الاتصال بالخادم');
     });
 
+    newSocket.on('reconnect', (attemptNumber) => {
+      console.log('Reconnected to server after', attemptNumber, 'attempts');
+      toast.success('تم إعادة الاتصال بالخادم');
+    });
+
+    newSocket.on('reconnect_error', (error) => {
+      console.error('Reconnection error:', error);
+      toast.error('فشل في إعادة الاتصال');
+    });
+
     setSocket(newSocket);
 
     return () => {
+      newSocket.off('connect');
+      newSocket.off('disconnect');
+      newSocket.off('connect_error');
+      newSocket.off('reconnect');
+      newSocket.off('reconnect_error');
       newSocket.close();
     };
   }, []);

@@ -15,7 +15,7 @@ const Lobby = () => {
   const [gameSettings, setGameSettings] = useState({
     roundTime: 60,
     totalRounds: 5,
-            categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون', 'اسم ولد', 'اسم بنت', 'مدينة'],
+            categories: ['فواكه', 'خضار', 'حيوان', 'بلد', 'جماد', 'لون'],
   });
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const Lobby = () => {
       return;
     }
 
-    // Join the room
-    socket.emit('joinLobby', { roomId });
+    // Join the room with player name for reconnection
+    socket.emit('joinLobby', { roomId, playerName: state.player?.name });
 
     // Listen for lobby updates
     socket.on('lobbyUpdate', (data) => {
