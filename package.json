@@ -1,0 +1,36 @@
+{
+  "name": "khodar-fawakih",
+  "version": "1.0.0",
+  "description": "Multiplayer Arabic word game - خضر و فواكه",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "install:all": "npm run install:client && npm run install:server",
+    "install:client": "cd client && npm install",
+    "install:server": "cd server && npm install",
+    "dev": "npm run install:all && concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "npm run install:all && cd server && npm start",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "arabic",
+    "game",
+    "multiplayer",
+    "socket.io",
+    "react",
+    "node.js",
+    "word-game"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
