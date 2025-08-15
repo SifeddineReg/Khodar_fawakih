@@ -1,4 +1,31 @@
+const fs = require('fs');
+const path = require('path');
 const { validateArabicWord } = require('./utils/arabicUtils');
+
+// Load wordlists into memory for fast lookup
+const CATEGORY_WORDLISTS = {
+  'فواكه': 'fruits.txt',
+  'خضار': 'vegetables.txt',
+  'حيوان': 'animals.txt',
+  'بلد': 'countries.txt',
+  'جماد': 'objects.txt',
+  'لون': 'colors.txt',
+};
+
+const WORDLISTS = {};
+for (const [cat, file] of Object.entries(CATEGORY_WORDLISTS)) {
+  const filePath = path.join(__dirname, 'wordlists', file);
+  if (fs.existsSync(filePath)) {
+    WORDLISTS[cat] = new Set(
+      fs.readFileSync(filePath, 'utf8')
+        .split('\n')
+        .map(w => w.trim())
+        .filter(Boolean)
+    );
+  } else {
+    WORDLISTS[cat] = new Set();
+  }
+}
 
 class GameManager {
   constructor() {
@@ -374,19 +401,18 @@ class GameManager {
 
         if (answer && answer.trim()) {
           const trimmedAnswer = answer.trim().toLowerCase();
-          
           // Check if answer starts with the correct letter
           if (validateArabicWord(trimmedAnswer, room.currentLetter)) {
-            // Check if answer is unique
-            const categoryAnswers = allAnswers[category] || [];
-            const sameAnswers = categoryAnswers.filter(a => 
-              a.answer === trimmedAnswer
-            );
-
-            if (sameAnswers.length === 1) {
-              score = 10; // Unique answer
-            } else {
-              score = 5; // Duplicate answer
+            // Check if answer is in the category wordlist
+            if (WORDLISTS[category] && WORDLISTS[category].has(trimmedAnswer)) {
+              // Check if answer is unique
+              const categoryAnswers = allAnswers[category] || [];
+              const sameAnswers = categoryAnswers.filter(a => a.answer === trimmedAnswer);
+              if (sameAnswers.length === 1) {
+                score = 10; // Unique answer
+              } else {
+                score = 5; // Duplicate answer
+              }
             }
           }
         }
